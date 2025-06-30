@@ -1,0 +1,87 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Hochwarth;
+
+use ProcessWire\HookEvent;
+use ProcessWire\Module;
+use ProcessWire\WireData;
+use ProcessWire\WireException;
+
+class AccessibilityTools extends WireData implements Module
+{
+    /**
+     * Get module information
+     */
+    public static function getModuleInfo(): array
+    {
+        return [
+            'title' => 'Accessibility Tools',
+            'version' => '1.0.0',
+            'summary' => 'Fügt der Website ein konfigurierbares Set an Barrierefreiheits-Funktionen für Besucher hinzu.',
+            'href' => 'https://github.com/pixeldasher/AccessibilityTools',
+            'author' => 'Phillip "pixeldasher" Issner',
+            'singular' => true,
+            'permission' => 'site-accessibility',
+            'icon' => 'universal-access',
+            'autoload' => 'template!=admin',
+            'requires' => [
+                'PHP>=8.3',
+                'ProcessWire>=3.0.249'
+            ],
+        ];
+    }
+
+    public function init(): void
+    {
+        $this->addHookAfter('Page::render', $this, 'injectTools');
+    }
+
+    public function injectTools(HookEvent $event): void
+    {
+        if ($this->config->admin || $this->config->ajax) {
+            return;
+        }
+
+        $conf = $this->modules->getConfig($this);
+        if (empty($conf))
+            return;
+
+        if (empty($conf['enabled'] || !$conf['enabled']))
+            return;
+
+        // Add CSS and JS to the page
+        $moduleUrl = $this->config->urls->{$this->className};
+        $this->config->scripts->add($moduleUrl . 'js/main.js');
+        $this->config->styles->add($moduleUrl . 'css/main.css');
+
+        // Prepare data for the view
+        $easyLanguagePage = $this->pages->get((int) $this->get('easy_language_page'));
+        $signLanguagePage = $this->pages->get((int) $this->get('sign_language_page'));
+
+        $viewData = [
+            'enable_contrast_mode' => (bool) $this->get('enable_contrast_mode'),
+            'enable_font_size_adjust' => (bool) $this->get('enable_font_size_adjust'),
+            'easy_language_url' => $easyLanguagePage->id ? $easyLanguagePage->url : '',
+            'sign_language_url' => $signLanguagePage->id ? $signLanguagePage->url : '',
+        ];
+
+        // Render the dialog view from the 'views' directory
+        $viewFile = $this->config->paths($this) . 'views/dialog.php';
+
+        if (!@is_file($viewFile)) {
+            if ($this->config->debug) {
+                throw new WireException("Ansichtsdatei nicht gefunden unter: $viewFile");
+            }
+
+            return;
+        }
+
+        $pattern = '/<body[^>]*>/i';
+        $html = $this->files->render($viewFile, $viewData);
+
+        // Append the HTML to the body tag
+        $event->return = preg_replace($pattern, "\$0{$html}", $event->return);
+    }
+}
