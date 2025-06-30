@@ -11,6 +11,13 @@ use ProcessWire\WireException;
 
 class AccessibilityTools extends WireData implements Module
 {
+    public function showTools(): bool
+    {
+        $conf = $this->modules->getConfig($this);
+
+        return !$this->config->admin && !$this->config->ajax && !empty($conf) && !empty($conf['enabled']) && $conf['enabled'];
+    }
+
     /**
      * Get module information
      */
@@ -38,25 +45,21 @@ class AccessibilityTools extends WireData implements Module
         $this->addHookAfter('Page::render', $this, 'injectTools');
     }
 
+    public function ready(): void
+    {
+        if ($this->showTools()) {
+            $moduleUrl = $this->config->urls($this);
+            $this->config->scripts->add($moduleUrl . 'scripts/main.js');
+            $this->config->styles->add($moduleUrl . 'styles/main.css');
+        }
+    }
+
     public function injectTools(HookEvent $event): void
     {
-        if ($this->config->admin || $this->config->ajax) {
+        if (!$this->showTools()) {
             return;
         }
 
-        $conf = $this->modules->getConfig($this);
-        if (empty($conf))
-            return;
-
-        if (empty($conf['enabled'] || !$conf['enabled']))
-            return;
-
-        // Add CSS and JS to the page
-        $moduleUrl = $this->config->urls->{$this->className};
-        $this->config->scripts->add($moduleUrl . 'js/main.js');
-        $this->config->styles->add($moduleUrl . 'css/main.css');
-
-        // Prepare data for the view
         $easyLanguagePage = $this->pages->get((int) $this->get('easy_language_page'));
         $signLanguagePage = $this->pages->get((int) $this->get('sign_language_page'));
 
@@ -67,7 +70,6 @@ class AccessibilityTools extends WireData implements Module
             'sign_language_url' => $signLanguagePage->id ? $signLanguagePage->url : '',
         ];
 
-        // Render the dialog view from the 'views' directory
         $viewFile = $this->config->paths($this) . 'views/dialog.php';
 
         if (!@is_file($viewFile)) {
