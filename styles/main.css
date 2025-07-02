@@ -1,0 +1,194 @@
+:where(:root) {
+	--contrast: var(--contrast-less);
+
+	--contrast-less: var(--contrast,);
+	--contrast-more: var(--contrast,);
+}
+
+@font-face {
+	font-family: "Overpass";
+	font-style: normal;
+	font-weight: 100 900;
+	font-display: swap;
+	src: url(./overpass.woff2) format("woff2");
+	unicode-range:
+		U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+		U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+		U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+.a11y-container {
+	--theme-border-radius: 0.5rem;
+	--theme-bg-color: white;
+	--theme-text-color: black;
+	--theme-accent-color: rgb(43, 71, 155);
+
+	color-scheme: light;
+
+	font-family: "Overpass", system-ui, sans-serif;
+	letter-spacing: -0.02em;
+
+	& ::selection {
+		background-color: color-mix(
+			in oklch,
+			transparent,
+			var(--theme-accent-color) 32.5%
+		);
+	}
+
+	/* focus */
+	& :where(:focus-visible) {
+		box-decoration-break: clone;
+		outline: 0.125rem solid var(--theme-accent-color) !important;
+		outline-offset: 0.125rem;
+		border-radius: 0.125rem;
+		background-color: color-mix(
+			in oklch,
+			transparent,
+			var(--theme-accent-color) 12.5%
+		);
+	}
+
+	& :is(h1, h2, h3, h4, h5) {
+		font-weight: bolder;
+		text-wrap-style: balance;
+	}
+
+	& :is(p, li) {
+		text-wrap-style: pretty;
+	}
+
+	& button {
+		appearance: none;
+		display: inline-block;
+		cursor: pointer;
+
+		inline-size: 100%;
+
+		border: 0.1rem solid
+			color-mix(in oklch, transparent, var(--theme-text-color) 12.5%);
+		border-radius: calc(var(--theme-border-radius) / 2);
+		padding-block: 0.5rem;
+		padding-inline: 1rem;
+
+		color: var(--theme-bg-color);
+		background-color: var(--theme-accent-color);
+	}
+
+	& > button {
+		position: fixed;
+		inset-inline-start: auto;
+		inset-inline-end: 0;
+		inset-block-start: auto;
+		inset-block-end: 0;
+		z-index: 9;
+
+		display: grid;
+		place-content: center;
+
+		min-inline-size: calc(44px + 0.25rem);
+		inline-size: auto;
+		min-block-size: calc(44px + 0.25rem);
+
+		margin: 1rem;
+	}
+
+	& .a11y-dialog {
+		position: fixed;
+		inset-inline-start: auto;
+		inset-inline-end: 0;
+		inset-block-start: auto;
+		inset-block-end: 0;
+		z-index: 10;
+
+		flex-direction: column;
+
+		max-block-size: calc(100% - 2rem);
+		overflow-y: auto;
+		inline-size: fit-content;
+		max-inline-size: min(80%, 24rem);
+
+		margin: 1rem;
+		border: 0.1rem solid
+			color-mix(in oklch, transparent, var(--theme-text-color) 12.5%);
+		border-radius: var(--theme-border-radius);
+		padding: 0;
+
+		color: var(--theme-text-color);
+		background-color: var(--theme-bg-color);
+
+		box-shadow: 0 0.25rem 0.5rem -0.425rem
+			color-mix(in oklch, transparent, var(--theme-text-color) 67.5%);
+
+		/* biome-ignore lint/correctness/noUnknownMediaFeatureName: Media query is known */
+		@media (prefers-reduced-transparency: no-preference) {
+			background-color: color-mix(
+				in oklch,
+				transparent,
+				var(--theme-bg-color) 92.5%
+			);
+
+			-webkit-backdrop-filter: blur(0.25rem) saturate(110%) contrast(110%)
+				brightness(110%);
+			backdrop-filter: blur(0.25rem) saturate(110%) contrast(110%)
+				brightness(110%);
+		}
+
+		&:where(:open) {
+			display: flex;
+		}
+
+		&::backdrop {
+			cursor: not-allowed;
+			background-color: transparent;
+			opacity: 0;
+		}
+
+		& ul[role] {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 0.5em;
+
+			padding-inline-start: 0;
+
+			& li {
+				margin: 0;
+			}
+
+			& ::marker {
+				content: none;
+				display: none;
+			}
+		}
+
+		& :any-link {
+			color: var(--theme-accent-color);
+			font-weight: 500;
+		}
+
+		& * {
+			margin: 0;
+		}
+
+		& > * * + * {
+			margin-block-start: 0.5rem;
+		}
+
+		& > * {
+			padding: 1.25rem;
+		}
+
+		& > :not(:last-child) {
+			border-block-end: 0.1rem solid
+				color-mix(in oklch, transparent, var(--theme-text-color) 12.5%);
+		}
+
+		& > footer {
+			background-color: color-mix(
+				in oklch,
+				transparent,
+				var(--theme-text-color) 3.75%
+			);
+		}
+	}
+}
