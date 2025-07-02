@@ -64,10 +64,10 @@ class AccessibilityTools extends WireData implements Module
         $signLanguagePage = $this->pages->get((int) $this->get('sign_language_page'));
 
         $viewData = [
-            'enable_contrast_mode' => (bool) $this->get('enable_contrast_mode'),
-            'enable_font_size_adjust' => (bool) $this->get('enable_font_size_adjust'),
-            'easy_language_url' => $easyLanguagePage->id ? $easyLanguagePage->url : '',
-            'sign_language_url' => $signLanguagePage->id ? $signLanguagePage->url : '',
+            'enableContrastMode' => (bool) $this->get('enable_contrast_mode'),
+            'enableFontSizeAdjust' => (bool) $this->get('enable_font_size_adjust'),
+            'easyLanguageUrl' => $easyLanguagePage->id ? $easyLanguagePage->url : '',
+            'signLanguageUrl' => $signLanguagePage->id ? $signLanguagePage->url : '',
         ];
 
         $viewFile = $this->config->paths($this) . 'views/dialog.php';
