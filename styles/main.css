@@ -18,15 +18,22 @@
 }
 
 .a11y-container {
-	--theme-border-radius: 0.5rem;
+	--theme-border-radius: 10px;
 	--theme-bg-color: white;
 	--theme-text-color: black;
 	--theme-accent-color: rgb(43, 71, 155);
+	--theme-transition: 425ms cubic-bezier(0.5, 0.1, 0.1, 1) 0ms;
 
 	color-scheme: light;
 
+	font-size: min(16px, 0.75em);
 	font-family: "Overpass", system-ui, sans-serif;
-	letter-spacing: -0.02em;
+	letter-spacing: -0.0225em;
+
+	& * {
+		font-family: inherit;
+		font-size: 1em;
+	}
 
 	& ::selection {
 		background-color: color-mix(
@@ -39,9 +46,9 @@
 	/* focus */
 	& :where(:focus-visible) {
 		box-decoration-break: clone;
-		outline: 0.125rem solid var(--theme-accent-color) !important;
-		outline-offset: 0.125rem;
-		border-radius: 0.125rem;
+		outline: 2px solid var(--theme-accent-color) !important;
+		outline-offset: 2px;
+		border-radius: 2px;
 		background-color: color-mix(
 			in oklch,
 			transparent,
@@ -49,12 +56,23 @@
 		);
 	}
 
-	& :is(h1, h2, h3, h4, h5) {
+	& :is(h2, h3) {
 		font-weight: bolder;
 		text-wrap-style: balance;
+		hyphens: auto;
+		overflow-wrap: break-word;
 	}
 
-	& :is(p, li) {
+	& h2 {
+		font-size: 1.675em;
+	}
+
+	& h3 {
+		font-size: 1.325em;
+	}
+
+	& p {
+		font-size: 1em;
 		text-wrap-style: pretty;
 	}
 
@@ -65,11 +83,11 @@
 
 		inline-size: 100%;
 
-		border: 0.1rem solid
+		border: 1px solid
 			color-mix(in oklch, transparent, var(--theme-text-color) 12.5%);
 		border-radius: calc(var(--theme-border-radius) / 2);
-		padding-block: 0.5rem;
-		padding-inline: 1rem;
+		padding-block: 0.25em;
+		padding-inline: 0.5em;
 
 		color: var(--theme-bg-color);
 		background-color: var(--theme-accent-color);
@@ -86,11 +104,20 @@
 		display: grid;
 		place-content: center;
 
-		min-inline-size: calc(44px + 0.25rem);
+		min-inline-size: calc(44px + 0.25em);
 		inline-size: auto;
-		min-block-size: calc(44px + 0.25rem);
+		min-block-size: calc(44px + 0.25em);
 
 		margin: 1rem;
+
+		transition:
+			transform var(--theme-transition),
+			opacity var(--theme-transition);
+
+		&:has(+ dialog:open) {
+			transform: scale(50%);
+			opacity: 0;
+		}
 	}
 
 	& .a11y-dialog {
@@ -117,6 +144,9 @@
 		color: var(--theme-text-color);
 		background-color: var(--theme-bg-color);
 
+		/* Exit Stage To */
+		opacity: 0;
+		transform: translateX(100%) translateX(2rem);
 		box-shadow: 0 0.25rem 0.5rem -0.425rem
 			color-mix(in oklch, transparent, var(--theme-text-color) 67.5%);
 
@@ -134,14 +164,42 @@
 				brightness(110%);
 		}
 
-		&:where(:open) {
-			display: flex;
+		&,
+		&::backdrop {
+			transition:
+				display var(--theme-transition) allow-discrete,
+				overlay var(--theme-transition) allow-discrete,
+				opacity var(--theme-transition),
+				transform var(--theme-transition);
 		}
 
 		&::backdrop {
 			cursor: not-allowed;
-			background-color: transparent;
+			background-color: var(--theme-text-color);
 			opacity: 0;
+		}
+
+		/* On Stage */
+		&:open {
+			display: flex;
+			opacity: 1;
+			transform: none;
+
+			&::backdrop {
+				opacity: 0.1;
+			}
+		}
+
+		/* Enter Stage From */
+		@starting-style {
+			&:open,
+			&:open::backdrop {
+				opacity: 0;
+			}
+
+			&:open {
+				transform: translateX(100%) translateX(2rem);
+			}
 		}
 
 		& ul[role] {
