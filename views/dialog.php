@@ -4,81 +4,166 @@ declare(strict_types=1);
 
 namespace Hochwarth;
 
+use ProcessWire\WireFileTools;
+
 use function ProcessWire\__;
+
+/**
+ * @var WireFileTools $files
+ * @var Config $config
+ * @var AccessibilityTools $module
+ */
+$url = $config->urls($module);
+$path = $config->paths($module);
 
 ?>
 
-<hit-a11y>
-    <template shadowrootmode="closed">
-        <link rel="stylesheet" nonce="proxy" href="<?= $config->urls($module) ?>styles/main.css">
-        <script type="module" nonce="proxy" src="<?= $config->urls($module) ?>scripts/main.js"></script>
+<accessibility-tools>
+	<template shadowrootmode="open">
+		<link rel="stylesheet" nonce="proxy" href="<?= $url ?>styles/main.css">
+		<script type="module" nonce="proxy" src="<?= $url ?>scripts/main.js"></script>
 
-        <nav
-            id="accessibility-tools-nav"
-            class="a11y-container"
-            aria-label="<?= __('Inhalte zur Barrierefreiheit', 'AccessibilityTools'); ?>">
-            <button
-                type="button"
-                class="a11y-button"
-                commandfor="accessibility-tools"
-                command="show-modal"
-                title="<?= __('Optionen zur Barrierefreiheit anzeigen', 'AccessibilityTools'); ?>">
-                #
-            </button>
+		<nav aria-label="<?= __('Inhalte zur Barrierefreiheit', 'AccessibilityTools'); ?>">
+			<button
+				type="button"
+				commandfor="accessibility-tools"
+				command="show-modal"
+				title="<?= __('Optionsfenster anzeigen', 'AccessibilityTools'); ?>">
+				<span aria-hidden="true">
+					<?= $files->fileGetContents("{$path}assets/accessibility.svg") ?>
+				</span>
+			</button>
 
-            <dialog
-                id="accessibility-tools"
-                class="a11y-dialog"
-                aria-labelledby="accessibility-tools-headline">
-                <header class="a11y-dialog-header">
-                    <h2 id="accessibility-tools-headline">
-                        <?= __('Optionen zur Barrierefreiheit', 'AccessibilityTools'); ?>
-                    </h2>
+			<dialog
+				id="accessibility-tools"
+				aria-labelledby="accessibility-tools-headline">
+				<header class="a11y-dialog-header">
+					<h2 id="accessibility-tools-headline">
+						<?= __('Optionen zur Barrierefreiheit', 'AccessibilityTools'); ?>
+					</h2>
 
-                    <form
-                        method="dialog"
-                        aria-label="<?= __('Aktionen', 'AccessibilityTools'); ?>">
-                        <button
-                            type="submit"
-                            class="a11y-button"
-                            title="<?= __('Optionen zur Barrierefreiheit ausblenden', 'AccessibilityTools'); ?>">
-                            #
-                        </button>
-                    </form>
-                </header>
+					<form
+						method="dialog"
+						aria-label="<?= __('Aktionen', 'AccessibilityTools'); ?>">
+						<button
+							type="submit"
+							title="<?= __('Optionsfenster ausblenden', 'AccessibilityTools'); ?>">
+							<span aria-hidden="true">
+								<?= $files->fileGetContents("{$path}assets/x-lg.svg") ?>
+							</span>
+						</button>
+					</form>
+				</header>
 
-                <div class="a11y-dialog-content">
-                    <?php if (!empty($enableContrastMode)): ?>
-                        KONTRAST
-                    <?php endif; ?>
-                    <?php if (!empty($enableFontSizeAdjust)): ?>
-                        SCHRIFT
-                    <?php endif; ?>
-                </div>
+				<?php if (!empty($enableContrastMode)): ?>
+					<section aria-labelledby="accessibility-tools-contrast-heading">
+						<header>
+							<h3 id="accessibility-tools-contrast-heading">
+								<?= __('Kontrast', 'AccessibilityTools'); ?>
+							</h3>
+						</header>
 
-                <footer>
-                    <nav aria-labelledby="accessibility-tools-footer-headline">
-                        <h3 id="accessibility-tools-footer-headline">Inhalte in zugänglicher Form:</h3>
+						<button
+							type="button"
+							id="contrast"
+							aria-pressed="false"
+							title="<?= __('Kontrastmodus umschalten', 'AccessibilityTools'); ?>">
+							<span role="img" aria-hidden="true">
+								<?= $files->fileGetContents("{$path}assets/circle-half.svg") ?>
+							</span>
+						</button>
+					</section>
+				<?php endif; ?>
+				<?php if (!empty($enableFontSizeAdjust)): ?>
 
-                        <ul role="list">
-                            <?php if (!empty($easyLanguageUrl)): ?>
-                                <li>
-                                    <a href="<?= $easyLanguageUrl; ?>">
-                                        Einfacher Sprache
-                                    </a>
-                                </li>
-                            <?php endif; ?>
-                            <?php if (!empty($signLanguageUrl)): ?>
-                                <li>
-                                    <a href="<?= $signLanguageUrl; ?>">
-                                        Inhalte in Gebärdensprache
-                                    </a>
-                                </li>
-                            <?php endif; ?>
-                        </ul>
-                    </nav>
-                </footer>
-            </dialog>
-        </nav>
-    </template>
-</hit-a11y>
+					<section aria-labelledby="accessibility-tools-fontsize-heading">
+						<header>
+							<h3 id="accessibility-tools-fontsize-heading">
+								<?= __('Schriftgröße', 'AccessibilityTools'); ?>
+							</h3>
+						</header>
+
+						<ul role="list" aria-label="Schrifteinstellungen">
+							<li>
+								<button
+									type="button"
+									id="font-increase"
+									title="<?= __('Schriftgröße erhöhen', 'AccessibilityTools'); ?>">
+									<span role="img" aria-hidden="true">
+										<?= $files->fileGetContents("{$path}assets/plus-circle-dotted.svg") ?>
+									</span>
+								</button>
+							</li>
+							<li>
+								<button
+									type="button"
+									id="font-reset"
+									title="<?= __('Schriftgröße zurücksetzen', 'AccessibilityTools'); ?>">
+									<span role="img" aria-hidden="true">
+										<?= $files->fileGetContents("{$path}assets/arrow-counterclockwise.svg") ?>
+									</span>
+								</button>
+							</li>
+							<li>
+								<button
+									type="button"
+									id="font-decrease"
+									title="<?= __('Schriftgröße verringern', 'AccessibilityTools'); ?>">
+									<span role="img" aria-hidden="true">
+										<?= $files->fileGetContents("{$path}assets/dash-circle-dotted.svg") ?>
+									</span>
+								</button>
+							</li>
+						</ul>
+					</section>
+				<?php endif; ?>
+
+				<footer>
+					<?php if (!empty("{$easyLanguageUrl}{$signLanguageUrl}{$accessibilityStatementUrl}")): ?>
+						<nav aria-labelledby="accessibility-tools-footer-headline">
+							<h3 id="accessibility-tools-footer-headline">
+								<?= __('Weitere Inhalte', 'AccessibilityTools'); ?>
+							</h3>
+
+							<ul role="list">
+								<?php if (!empty($easyLanguageUrl)): ?>
+									<li>
+										<a href="<?= $easyLanguageUrl; ?>">
+											Einfacher Sprache
+										</a>
+									</li>
+								<?php endif; ?>
+								<?php if (!empty($signLanguageUrl)): ?>
+									<li>
+										<a href="<?= $signLanguageUrl; ?>">
+											Inhalte in Gebärdensprache
+										</a>
+									</li>
+								<?php endif; ?>
+								<?php if (!empty($accessibilityStatementUrl)): ?>
+									<li>
+										<a href="<?= $accessibilityStatementUrl; ?>">
+											Erklärung zur Barrierefreiheit
+										</a>
+									</li>
+								<?php endif; ?>
+							</ul>
+						</nav>
+						<hr>
+					<?php endif; ?>
+
+					<button
+						type="button"
+						class="unobtrusive"
+						id="settings-reset"
+						title="<?= __('Einstellungen zurücksetzen', 'AccessibilityTools'); ?>">
+						<span role="img" aria-hidden="true">
+							<?= $files->fileGetContents("{$path}assets/arrow-counterclockwise.svg") ?>
+						</span>
+						<span>Einstellungen zurücksetzen</span>
+					</button>
+				</footer>
+			</dialog>
+		</nav>
+	</template>
+</accessibility-tools>

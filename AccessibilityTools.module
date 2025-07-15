@@ -34,8 +34,8 @@ class AccessibilityTools extends WireData implements Module
             'icon' => 'universal-access',
             'autoload' => 'template!=admin',
             'requires' => [
-                'PHP>=8.3',
-                'ProcessWire>=3.0.249'
+                'PHP>=8.1',
+                'ProcessWire>=3.0.229'
             ],
         ];
     }
@@ -62,6 +62,7 @@ class AccessibilityTools extends WireData implements Module
 
         $easyLanguagePage = $this->pages->get((int) $this->get('easy_language_page'));
         $signLanguagePage = $this->pages->get((int) $this->get('sign_language_page'));
+        $accessibilityStatementPage = $this->pages->get((int) $this->get('accessibility_statement_page'));
 
         $viewData = [
             'module' => $this,
@@ -69,6 +70,7 @@ class AccessibilityTools extends WireData implements Module
             'enableFontSizeAdjust' => (bool) $this->get('enable_font_size_adjust'),
             'easyLanguageUrl' => $easyLanguagePage->id ? $easyLanguagePage->url : '',
             'signLanguageUrl' => $signLanguagePage->id ? $signLanguagePage->url : '',
+            'accessibilityStatementUrl' => $accessibilityStatementPage->id ? $accessibilityStatementPage->url : '',
         ];
 
         $viewFile = $this->config->paths($this) . 'views/dialog.php';
