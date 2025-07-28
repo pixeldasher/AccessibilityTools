@@ -66,11 +66,11 @@ $path = $config->paths($module);
 						<button
 							type="button"
 							id="contrast"
-							aria-pressed="false"
-							title="<?= __('Kontrastmodus umschalten', 'AccessibilityTools'); ?>">
+							aria-pressed="false">
 							<span role="img" aria-hidden="true">
 								<?= $files->fileGetContents("{$path}assets/circle-half.svg") ?>
 							</span>
+							<span><?= __('Kontrast umschalten', 'AccessibilityTools'); ?></span>
 						</button>
 					</section>
 				<?php endif; ?>
@@ -92,6 +92,7 @@ $path = $config->paths($module);
 									<span role="img" aria-hidden="true">
 										<?= $files->fileGetContents("{$path}assets/plus-circle-dotted.svg") ?>
 									</span>
+									<span><?= __('Erhöhen', 'AccessibilityTools'); ?></span>
 								</button>
 							</li>
 							<li>
@@ -102,6 +103,7 @@ $path = $config->paths($module);
 									<span role="img" aria-hidden="true">
 										<?= $files->fileGetContents("{$path}assets/arrow-counterclockwise.svg") ?>
 									</span>
+									<span><?= __('Zurücksetzen', 'AccessibilityTools'); ?></span>
 								</button>
 							</li>
 							<li>
@@ -112,6 +114,7 @@ $path = $config->paths($module);
 									<span role="img" aria-hidden="true">
 										<?= $files->fileGetContents("{$path}assets/dash-circle-dotted.svg") ?>
 									</span>
+									<span><?= __('Verringern', 'AccessibilityTools'); ?></span>
 								</button>
 							</li>
 						</ul>
