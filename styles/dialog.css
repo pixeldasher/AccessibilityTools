@@ -75,6 +75,7 @@ button {
 	color: var(--theme-bg-color);
 	background-color: var(--theme-accent-color);
 
+	user-select: none;
 	cursor: pointer;
 	transition: background-color var(--theme-transition);
 
@@ -137,7 +138,7 @@ button {
 		inset-inline-end: 0;
 		inset-block-start: auto;
 		inset-block-end: 0;
-		z-index: 9;
+		z-index: calc(Infinity);
 
 		display: grid;
 		place-content: center;
@@ -207,7 +208,6 @@ dialog {
 	inset-inline-end: 0;
 	inset-block-start: auto;
 	inset-block-end: 0;
-	z-index: 10;
 
 	flex-direction: column;
 
@@ -267,7 +267,7 @@ dialog {
 		transform: none;
 
 		&::backdrop {
-			opacity: 0.1;
+			opacity: 0.125;
 		}
 	}
 

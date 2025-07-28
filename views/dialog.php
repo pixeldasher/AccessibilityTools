@@ -26,6 +26,7 @@ $path = $config->paths($module);
 		<nav aria-label="<?= __('Inhalte zur Barrierefreiheit', 'AccessibilityTools'); ?>">
 			<button
 				type="button"
+				id="accessibility-tools-toggle"
 				commandfor="accessibility-tools"
 				command="show-modal"
 				title="<?= __('Optionsfenster anzeigen', 'AccessibilityTools'); ?>">
@@ -65,7 +66,7 @@ $path = $config->paths($module);
 
 						<button
 							type="button"
-							id="contrast"
+							id="contrast-toggle"
 							aria-pressed="false">
 							<span role="img" aria-hidden="true">
 								<?= $files->fileGetContents("{$path}assets/circle-half.svg") ?>
@@ -87,7 +88,7 @@ $path = $config->paths($module);
 							<li>
 								<button
 									type="button"
-									id="font-increase"
+									id="font-size-increase"
 									title="<?= __('Schriftgröße erhöhen', 'AccessibilityTools'); ?>">
 									<span role="img" aria-hidden="true">
 										<?= $files->fileGetContents("{$path}assets/plus-circle-dotted.svg") ?>
@@ -98,7 +99,7 @@ $path = $config->paths($module);
 							<li>
 								<button
 									type="button"
-									id="font-reset"
+									id="font-size-reset"
 									title="<?= __('Schriftgröße zurücksetzen', 'AccessibilityTools'); ?>">
 									<span role="img" aria-hidden="true">
 										<?= $files->fileGetContents("{$path}assets/arrow-counterclockwise.svg") ?>
@@ -109,7 +110,7 @@ $path = $config->paths($module);
 							<li>
 								<button
 									type="button"
-									id="font-decrease"
+									id="font-size-decrease"
 									title="<?= __('Schriftgröße verringern', 'AccessibilityTools'); ?>">
 									<span role="img" aria-hidden="true">
 										<?= $files->fileGetContents("{$path}assets/dash-circle-dotted.svg") ?>
@@ -118,6 +119,8 @@ $path = $config->paths($module);
 								</button>
 							</li>
 						</ul>
+
+						<input type="hidden" id="font-size-value" name="font-size-value" value="4">
 					</section>
 				<?php endif; ?>
 
