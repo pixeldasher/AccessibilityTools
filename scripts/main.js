@@ -174,7 +174,7 @@ document.addEventListener(
 		 * Wendet die berechnete Schriftgröße auf den body an.
 		 * @param {number} level - Die Schriftgrößenstufe von 1 bis 7.
 		 */
-		const applyFontSize = (level) => {
+		const _applyFontSize = (level) => {
 			const factor = calculateFontSizeFactor(level);
 			document.body.style.fontSize = `${factor}em`;
 		};

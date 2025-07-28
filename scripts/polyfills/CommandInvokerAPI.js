@@ -1,12 +1,13 @@
 /**
  * A simple polyfill for the Command Invoker API
+ * @param {Document|ShadowRoot} root
  */
-if (!Object.hasOwn(HTMLButtonElement.prototype, "command")) {
-	for (const button of document.querySelectorAll("button[commandfor]")) {
+const polyfill = (root = document) => {
+	for (const button of root.querySelectorAll("button[commandfor]")) {
 		const targetId = button.getAttribute("commandfor");
 		if (!targetId) continue;
 
-		const target = document.getElementById(targetId);
+		const target = root.getElementById(targetId);
 		if (!(target instanceof HTMLDialogElement)) continue;
 
 		button.removeAttribute("commandfor");
@@ -31,6 +32,6 @@ if (!Object.hasOwn(HTMLButtonElement.prototype, "command")) {
 			target[action].call(target);
 		});
 	}
-}
+};
 
-export {};
+export { polyfill as init };
