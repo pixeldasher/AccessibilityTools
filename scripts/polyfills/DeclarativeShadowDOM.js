@@ -32,6 +32,6 @@ const attachShadowRoots = (root = document) => {
 const init = () => {
 	/** Initial invocation */
 	attachShadowRoots();
-}
+};
 
 export { init };
