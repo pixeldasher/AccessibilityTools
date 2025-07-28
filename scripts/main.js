@@ -1,43 +1,34 @@
-window.customElements.define(
-	"accessibility-tools",
-	class AccessibilityTools extends HTMLElement {
-		async connectedCallback() {
-			await this.initializePolyfills();
+class AccessibilityTools extends HTMLElement {
+	async connectedCallback() {
+		await this.initializePolyfills();
+	}
+
+	async initializePolyfills() {
+		if (!Object.hasOwn(HTMLTemplateElement.prototype, "shadowRootMode")) {
+			const { init } = await import("./polyfills/DeclarativeShadowDOM.js");
+
+			init();
 		}
 
-		async initializePolyfills() {
-			if (!Object.hasOwn(HTMLTemplateElement.prototype, "shadowRootMode")) {
-				const { init } = await import("./polyfills/DeclarativeShadowDOM.js");
+		if (!this.shadowRoot) return;
 
-				init();
-			}
+		if (!Object.hasOwn(HTMLButtonElement.prototype, "command")) {
+			const { init } = await import("./polyfills/CommandInvokerAPI.js");
 
-			if (!this.shadowRoot) return;
-
-			if (!Object.hasOwn(HTMLButtonElement.prototype, "command")) {
-				const { init } = await import("./polyfills/CommandInvokerAPI.js");
-
-				init(this.shadowRoot);
-			}
+			init(this.shadowRoot);
 		}
-	},
-);
+	}
+}
 
-/** Initalize all needed polyfills */
-(async () => {})();
+window.customElements.define("accessibility-tools", AccessibilityTools);
 
 const root = document.documentElement;
 
 const detectUserPreferences = () => {
 	// Reset all classes
 	root.classList.remove(
-		"prefers-reduced-transparency",
-		"prefers-dark-scheme",
-		"prefers-light-scheme",
-		"prefers-reduced-motion",
-		"system-contrast-mode-high",
-		"system-contrast-mode-low",
-		"system-contrast-mode-forced",
+		/** */
+		"high-contrast",
 	);
 
 	// prefers-reduced-transparency
@@ -79,29 +70,58 @@ const detectUserPreferences = () => {
 document.addEventListener(
 	"DOMContentLoaded",
 	() => {
-		const menuPanel = document.getElementById("accessibility-menu-panel");
-		if (!(menuPanel instanceof HTMLElement)) return;
+		const accessibilityTools = document
+			.getElementsByTagName("accessibility-tools")
+			.item(0);
+		if (!(accessibilityTools instanceof AccessibilityTools)) return;
 
-		const toggleButton = document.getElementById("accessibility-menu-toggle");
+		const shadowRoot = accessibilityTools.shadowRoot;
+		if (!shadowRoot) return;
+
+		const dialog = shadowRoot.getElementById("accessibility-tools");
+		if (!(dialog instanceof HTMLDialogElement)) return;
+
+		const toggleButton = shadowRoot.getElementById(
+			"accessibility-tools-toggle",
+		);
 		if (!(toggleButton instanceof HTMLButtonElement)) return;
 
-		const contrastButton = document.getElementById("contrast-mode");
+		const contrastButton = shadowRoot.getElementById("contrast-toggle");
 		if (!(contrastButton instanceof HTMLButtonElement)) return;
 
-		const brightnessSlider = document.getElementById("brightness-slider");
-		if (!(brightnessSlider instanceof HTMLInputElement)) return;
+		const fontSizeIncrease = shadowRoot.getElementById("font-size-increase");
+		if (!(fontSizeIncrease instanceof HTMLButtonElement)) return;
 
-		const fontSizeSelect = document.getElementById("font-size-select");
-		if (!(fontSizeSelect instanceof HTMLSelectElement)) return;
+		const fontSizeReset = shadowRoot.getElementById("font-size-reset");
+		if (!(fontSizeReset instanceof HTMLButtonElement)) return;
 
-		const resetSettingsButton = document.getElementById("reset-settings");
+		const fontSizeDecrease = shadowRoot.getElementById("font-size-decrease");
+		if (!(fontSizeDecrease instanceof HTMLButtonElement)) return;
+
+		const resetSettingsButton = shadowRoot.getElementById("settings-reset");
 		if (!(resetSettingsButton instanceof HTMLButtonElement)) return;
+
+		document.addEventListener(
+			"keydown",
+			(event) => {
+				/** Only listen if the dialog is not open */
+				if (dialog.open) return;
+
+				/** Listen for key press of "a" key */
+				if (event.key.toLocaleLowerCase() !== "a") return;
+
+				/** Stop if user might try to run a command */
+				if (event.ctrlKey || event.shiftKey || event.altKey || event.metaKey)
+					return;
+
+				toggleButton.focus({ preventScroll: true });
+			},
+			{ passive: true },
+		);
 
 		/**
 		 * @typedef {Object} Settings
 		 * @property {boolean} highContrast
-		 * @property {string} brightness
-		 * @property {string} fontSizeLevel
 		 */
 
 		// --- Funktionen zum Speichern und Laden der Einstellungen ---
@@ -109,8 +129,6 @@ document.addEventListener(
 			/** @type {Settings} settings */
 			const settings = {
 				highContrast: contrastButton.getAttribute("aria-pressed") === "true",
-				brightness: brightnessSlider.value,
-				fontSizeLevel: fontSizeSelect.value,
 			};
 			localStorage.setItem("accessibilitySettings", JSON.stringify(settings));
 		};
@@ -124,31 +142,11 @@ document.addEventListener(
 				// Kontrast
 				const isHighContrast = settings.highContrast;
 				contrastButton.setAttribute("aria-pressed", String(isHighContrast));
-				document.body.classList.toggle("high-contrast", isHighContrast);
-
-				// Helligkeit
-				brightnessSlider.value = String(settings.brightness);
-				brightnessSlider.setAttribute(
-					"aria-valuetext",
-					`${settings.brightness} Prozent`,
-				);
-				root.style.setProperty(
-					"--brightness",
-					`${Math.round(Number.parseInt(settings.brightness)) / 100}`,
-				);
-
-				// Schriftgröße
-				fontSizeSelect.value = settings.fontSizeLevel;
-				applyFontSize(Number.parseInt(settings.fontSizeLevel));
+				root.classList.toggle("high-contrast", isHighContrast);
 			} else {
 				// Standardeinstellungen, falls noch nichts gespeichert ist
 				contrastButton.setAttribute("aria-pressed", "false");
-				document.body.classList.remove("high-contrast");
-				brightnessSlider.value = String(50);
-				brightnessSlider.setAttribute("aria-valuetext", "50 Prozent");
-				root.style.setProperty("--brightness", "0.5"); // Standard Helligkeit
-				fontSizeSelect.value = String(4); // Standard Stufe 4 (Faktor 1)
-				applyFontSize(4); // Standard Schriftgröße
+				root.classList.remove("high-contrast");
 			}
 		};
 
@@ -183,18 +181,6 @@ document.addEventListener(
 
 		// --- Event Listener ---
 
-		// Menü-Umschalter
-		toggleButton.addEventListener(
-			"click",
-			() => {
-				const isExpanded =
-					toggleButton.getAttribute("aria-expanded") === "true";
-				toggleButton.setAttribute("aria-expanded", String(!isExpanded));
-				menuPanel.hidden = isExpanded;
-			},
-			{ passive: true },
-		);
-
 		// Kontrast-Umschalter (manuelle Einstellung, überschreibt/ergänzt System-Präferenz)
 		contrastButton.addEventListener(
 			"click",
@@ -202,36 +188,7 @@ document.addEventListener(
 				const isPressed =
 					contrastButton.getAttribute("aria-pressed") === "true";
 				contrastButton.setAttribute("aria-pressed", String(!isPressed));
-				document.body.classList.toggle("high-contrast", !isPressed);
-				saveSettings();
-			},
-			{ passive: true },
-		);
-
-		// Helligkeits-Schieberegler
-		brightnessSlider.addEventListener(
-			"input",
-			() => {
-				const brightnessValue = brightnessSlider.value;
-				brightnessSlider.setAttribute(
-					"aria-valuetext",
-					`${brightnessValue} Prozent`,
-				);
-				root.style.setProperty(
-					"--brightness",
-					`${Number.parseInt(brightnessValue) / 100}`,
-				);
-				saveSettings();
-			},
-			{ passive: true },
-		);
-
-		// Schriftgrößen-Auswahl
-		fontSizeSelect.addEventListener(
-			"change",
-			() => {
-				const selectedLevel = parseInt(fontSizeSelect.value);
-				applyFontSize(selectedLevel);
+				root.classList.toggle("high-contrast", !isPressed);
 				saveSettings();
 			},
 			{ passive: true },
